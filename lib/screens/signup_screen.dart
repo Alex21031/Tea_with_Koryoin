@@ -277,7 +277,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
-                        _selectedFile!.path.split('/').last, // 파일명만 표시
+                        _selectedFile!.path.split('/').last,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
                       ),

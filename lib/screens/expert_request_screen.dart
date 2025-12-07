@@ -21,7 +21,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
   void initState() {
     super.initState();
     
-    // [추가된 로직] 위젯이 빌드된 후 상태 확인 및 처리
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       
@@ -32,7 +31,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
     });
   }
 
-  // 심사 중 메시지를 띄우고 화면을 닫는 함수
   void _showPendingMessageAndPop() {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -41,7 +39,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
       Navigator.pop(context);
   }
 
-  // 파일 선택 함수
   Future<void> _pickFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -62,7 +59,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
     }
   }
 
-  // 제출 함수
   void _submit() async {
     if (_selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +77,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
       return;
     }
     
-    // [중복 요청 방지 최종 확인] 버튼 클릭 시점에서도 다시 한번 확인
     if (user.certificatePath != null) {
       _showPendingMessageAndPop();
       return;
@@ -97,7 +92,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
         token: user.token!,
       );
 
-      // 신청 성공 후 로컬 앱 상태를 즉시 업데이트
       authProvider.markExpertRequested(); 
 
       if (!mounted) return;
@@ -117,7 +111,6 @@ class _ExpertRequestScreenState extends State<ExpertRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // initState에서 이미 처리를 했으므로, 빌드 시점에서는 UI만 그립니다.
     return Scaffold(
       appBar: AppBar(
         title: const Text('전문가 인증 신청', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),

@@ -22,23 +22,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   // UI 상태 관리 변수
   late int _likeCount;
   late int _commentCount;
-  bool _isLiked = false; // 기본값은 false지만, initState에서 서버 값을 가져옴
+  bool _isLiked = false;
 
   @override
   void initState() {
     super.initState();
-    // 1. 초기값 설정 (화면 먼저 보여주기 위해)
     _likeCount = widget.post.likeCount;
     _commentCount = widget.post.commentCount;
     
-    // 2. 댓글 목록 불러오기
     _commentsFuture = _apiService.getComments(widget.post.id);
 
-    // 3. ✅ [추가됨] 서버에서 진짜 좋아요 상태와 최신 개수 가져오기
     _fetchLikeStatus();
   }
 
-  // 좋아요 상태 불러오기 함수
   void _fetchLikeStatus() async {
     final user = Provider.of<AuthProvider>(context, listen: false).user;
     if (user == null) return;
@@ -47,8 +43,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final result = await _apiService.checkLikeStatus(widget.post.id, int.parse(user.id));
       if (mounted) {
         setState(() {
-          _isLiked = result['is_liked'];       // 내가 눌렀는지?
-          _likeCount = result['like_count'];   // 최신 개수
+          _isLiked = result['is_liked'];
+          _likeCount = result['like_count'];
         });
       }
     } catch (e) {
@@ -62,7 +58,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     super.dispose();
   }
 
-  // 게시물 삭제 함수
   void _deletePost() async {
     final user = Provider.of<AuthProvider>(context, listen: false).user;
     if (user == null) return;
@@ -92,7 +87,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
-  // 좋아요 토글 함수
   void _toggleLike() async {
     final user = Provider.of<AuthProvider>(context, listen: false).user;
     if (user == null) {
@@ -100,23 +94,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       return;
     }
 
-    // UI 선반영 (즉각적인 반응을 위해)
     setState(() {
       _isLiked = !_isLiked;
       _likeCount += _isLiked ? 1 : -1;
     });
 
     try {
-      // 서버 요청
       final result = await _apiService.likePost(widget.post.id, int.parse(user.id));
-      // 서버 결과로 다시 동기화 (확실하게 하기 위해)
       setState(() {
         _isLiked = result['is_liked'];
         _likeCount = result['like_count'];
       });
     } catch (e) {
       print('좋아요 오류: $e');
-      // 에러 나면 롤백
       setState(() {
         _isLiked = !_isLiked;
         _likeCount += _isLiked ? 1 : -1;

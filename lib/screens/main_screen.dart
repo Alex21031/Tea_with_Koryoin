@@ -16,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const CommunityScreen(),      // 0: 게시판
     const Center(child: Text('채팅 화면 (준비중)')), // 1: 채팅 (임시)
-    const Center(child: Text('수업관리 화면 (준비중)')), // 2: 수업관리 (임시)
+    const Center(child: Text('수입관리 화면 (준비중)')), // 2: 수업관리 (임시)
     const ProfileScreen(),        // 3: 프로필
   ];
 
