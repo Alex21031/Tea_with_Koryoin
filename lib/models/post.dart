@@ -41,7 +41,6 @@ class Post {
   }
 }
 
-// ✅ [추가됨] Comment 클래스 정의
 class Comment {
   final int id;
   final int postId;

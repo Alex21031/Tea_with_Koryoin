@@ -83,12 +83,7 @@ class _CommunityScreenState extends State<CommunityScreen>
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.black), 
-            onPressed: () {}
-          ),
-        ],
+        // actions: [] // 알림 아이콘 삭제됨
       ),
       body: Column(
         children: [
@@ -148,12 +143,10 @@ class _CommunityScreenState extends State<CommunityScreen>
                   return const Center(child: CircularProgressIndicator());
                 }
                 
-                
                 if (snapshot.hasError) {
                   return Center(child: Text('오류 발생: ${snapshot.error}'));
                 }
 
-                
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
                     child: Column(
@@ -166,7 +159,6 @@ class _CommunityScreenState extends State<CommunityScreen>
                     ),
                   );
                 }
-
               
                 final posts = snapshot.data!;
                 return ListView.separated(
@@ -180,7 +172,6 @@ class _CommunityScreenState extends State<CommunityScreen>
           ),
         ],
       ),
-      
       
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
@@ -204,11 +195,14 @@ class _CommunityScreenState extends State<CommunityScreen>
 
   Widget _buildPostCard(Post post) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => PostDetailScreen(post: post)),
         );
+        if (result == true) {
+          setState(() {});
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -227,6 +221,7 @@ class _CommunityScreenState extends State<CommunityScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 1. 제목
             Text(
               post.title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
@@ -234,6 +229,8 @@ class _CommunityScreenState extends State<CommunityScreen>
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 6),
+            
+            // 2. 내용
             Text(
               post.content,
               maxLines: 2,
@@ -241,19 +238,39 @@ class _CommunityScreenState extends State<CommunityScreen>
               style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.4),
             ),
             const SizedBox(height: 12),
+            
+            // 3. 하단 정보
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // 작성자, 날짜
                 Row(
                   children: [
                     const Icon(Icons.person_outline, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text("익명", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                    Text(
+                      post.author.isNotEmpty ? post.author : '익명', 
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _formatDate(post.createdAt ?? DateTime.now().toString()), 
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])
+                    ),
                   ],
                 ),
-                Text(
-                  _formatDate(post.createdAt ?? DateTime.now().toString()), 
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600])
+
+                // 좋아요, 댓글 수
+                Row(
+                  children: [
+                    Icon(Icons.favorite_border, size: 14, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Text('${post.likeCount}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                    const SizedBox(width: 10),
+                    Icon(Icons.chat_bubble_outline, size: 14, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Text('${post.commentCount}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ],
                 ),
               ],
             ),

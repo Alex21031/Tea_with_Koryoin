@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'community_screen.dart';
 import 'profile_screen.dart';
+import 'chat_list_screen.dart'; 
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,12 +13,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // 각 탭에 연결될 화면들
   final List<Widget> _screens = [
     const CommunityScreen(),      // 0: 게시판
-    const Center(child: Text('채팅 화면 (준비중)')), // 1: 채팅 (임시)
-    const Center(child: Text('수입관리 화면 (준비중)')), // 2: 수업관리 (임시)
-    const ProfileScreen(),        // 3: 프로필
+    const ChatListScreen(),       // 1: 채팅
+    const ProfileScreen(),        // 2: 프로필
   ];
 
   void _onItemTapped(int index) {
@@ -37,10 +36,10 @@ class _MainScreenState extends State<MainScreen> {
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed, // 탭이 4개 이상일 때 필수
+          type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
-          selectedItemColor: Colors.black, // 선택된 아이콘 색상 (검정)
-          unselectedItemColor: Colors.grey, // 선택 안 된 아이콘 색상 (회색)
+          selectedItemColor: const Color(0xFF4E342E),
+          unselectedItemColor: Colors.grey[400],
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
@@ -55,11 +54,6 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(Icons.chat_bubble_outline),
               activeIcon: Icon(Icons.chat_bubble),
               label: '채팅',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
-              label: '수업관리',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

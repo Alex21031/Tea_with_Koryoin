@@ -15,7 +15,7 @@ Future<Response> onRequest(RequestContext context) async {
 }
 
 // ==========================================
-// 1. 게시물 조회 (GET) - 유저별 필터 추가됨
+// 1. 게시물 조회 (GET) - 댓글 수(comment_count) 추가됨
 // ==========================================
 Future<Response> _getPosts(RequestContext context) async {
   try {
@@ -25,44 +25,64 @@ Future<Response> _getPosts(RequestContext context) async {
     final page = int.tryParse(params['page'] ?? '1') ?? 1;
     final category = params['category'];
     final keyword = params['q'];
-    // ✅ [추가] 특정 유저의 글만 보기 위한 파라미터
     final userIdParam = params['user_id']; 
 
     final limit = 10;
     final offset = (page - 1) * limit;
 
-    var query = 'SELECT * FROM posts WHERE 1=1';
+    // ✅ [수정] 댓글 수(comment_count)를 서브쿼리로 가져옵니다.
+    // PostgreSQL에서 COUNT(*)는 bigint라 ::int로 형변환이 안전합니다.
+    var query = '''
+      SELECT 
+        p.id, 
+        p.user_id, 
+        p.title, 
+        p.content, 
+        p.category, 
+        p.created_at, 
+        p.views, 
+        p.likes,
+        u.username as author_name,
+        (SELECT COUNT(*)::int FROM comments c WHERE c.post_id = p.id) as comment_count 
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      WHERE 1=1
+    ''';
+    
     final Map<String, dynamic> queryParams = {};
 
     if (category != null && category.isNotEmpty) {
-      query += ' AND category = @category';
+      query += ' AND p.category = @category';
       queryParams['category'] = category;
     }
 
     if (keyword != null && keyword.isNotEmpty) {
-      query += ' AND (title ILIKE @keyword OR content ILIKE @keyword)';
+      query += ' AND (p.title ILIKE @keyword OR p.content ILIKE @keyword)';
       queryParams['keyword'] = '%$keyword%';
     }
 
-    // ✅ [추가] 유저 ID 필터링 로직
     if (userIdParam != null && userIdParam.isNotEmpty) {
-      query += ' AND user_id = @userId';
+      query += ' AND p.user_id = @userId';
       queryParams['userId'] = int.parse(userIdParam);
     }
 
-    query += ' ORDER BY created_at DESC LIMIT $limit OFFSET $offset';
+    query += ' ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset';
 
     final result = await pool.execute(Sql.named(query), parameters: queryParams);
 
-    // DateTime 변환 및 결과 반환
     final posts = result.map((row) {
-      final map = row.toColumnMap();
-      return map.map((key, value) {
-        if (value is DateTime) {
-          return MapEntry(key, value.toIso8601String());
-        }
-        return MapEntry(key, value);
-      });
+      return {
+        'id': row[0],
+        'user_id': row[1],
+        'title': row[2],
+        'content': row[3],
+        'category': row[4],
+        'created_at': (row[5] as DateTime).toIso8601String(),
+        'views': row[6] ?? 0,
+        'likes': row[7] ?? 0,
+        'author_name': row[8],
+        'comment_count': row[9] ?? 0, // ✅ 댓글 수 매핑
+      };
     }).toList();
 
     return Response.json(body: {'posts': posts});
@@ -103,6 +123,7 @@ Future<Response> _createPost(RequestContext context) async {
        return Response.json(statusCode: 400, body: {'error': '유효하지 않은 게시판 ID입니다.'});
     }
 
+    // 전문가 게시판 권한 체크
     if (boardId == 2) {
       final userResult = await pool.execute(
         Sql.named('SELECT role FROM users WHERE id = @id'),
@@ -119,6 +140,7 @@ Future<Response> _createPost(RequestContext context) async {
       }
     }
     
+    // DB Insert
     await pool.execute(
       Sql.named('''
         INSERT INTO posts (title, content, user_id, category, created_at, updated_at) 

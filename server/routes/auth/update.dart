@@ -16,7 +16,7 @@ Future<Response> onRequest(RequestContext context) async {
     final body = await context.request.json() as Map<String, dynamic>;
 
     final userId = body['user_id'] as int?;
-    final name = body['name'] as String?; // [추가] 실명 받기
+    final name = body['name'] as String?;
     final username = body['username'] as String?;
     final phone = body['phone'] as String?;
     final currentPassword = body['current_password'] as String?;
@@ -64,7 +64,7 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    // 2. [추가됨] 실명(Name) 업데이트 로직
+    // 2. 실명(Name) 업데이트
     if (name != null && name.isNotEmpty) {
       await pool.execute(
         Sql.named('UPDATE users SET name = @name WHERE id = @user_id'),
@@ -75,7 +75,7 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    // 3. 사용자명(Username) 업데이트 로직 (기존 유지)
+    // 3. 사용자명(Username) 업데이트
     if (username != null && username.isNotEmpty) {
       final usernameCheck = await pool.execute(
         Sql.named('SELECT id FROM users WHERE username = @username AND id != @user_id'),
@@ -101,7 +101,7 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    // 4. 전화번호 업데이트 로직 (기존 유지)
+    // 4. 전화번호 업데이트
     if (phone != null && phone.isNotEmpty) {
       final phoneCheck = await pool.execute(
         Sql.named('SELECT id FROM users WHERE phone = @phone AND id != @user_id'),
@@ -127,7 +127,9 @@ Future<Response> onRequest(RequestContext context) async {
       );
     }
 
-    // 5. [수정됨] 업데이트된 사용자 정보 조회 (name 컬럼 추가)
+
+
+
     final result = await pool.execute(
       Sql.named('''
         SELECT id, email, name, username, phone, created_at 
@@ -147,7 +149,7 @@ Future<Response> onRequest(RequestContext context) async {
         'user': {
           'id': user[0],
           'email': user[1],
-          'name': user[2], // [추가됨] 반환 값에 실명 포함
+          'name': user[2],
           'username': user[3],
           'phone': user[4],
           'created_at': user[5].toString(),

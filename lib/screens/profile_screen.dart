@@ -284,24 +284,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildInfoRow(Icons.person_outline, '이름', user.name.isNotEmpty ? user.name : '이름 없음'),
             _buildInfoRow(Icons.email_outlined, '이메일', user.email),
             _buildInfoRow(Icons.phone_outlined, '전화번호', user.phone),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.description_outlined, size: 20, color: Colors.grey[600]),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('소개', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
-                      const SizedBox(height: 4),
-                      Text(_introduction, style: const TextStyle(fontSize: 14, height: 1.4)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -324,7 +306,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildEditField('이름', TextEditingController(text: user.name), readOnly: true),
             _buildEditField('이메일', TextEditingController(text: user.email), readOnly: true),
             _buildEditField('전화번호', _phoneCtrl, keyboardType: TextInputType.phone),
-            _buildEditField('소개', _introCtrl, maxLines: 3),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/post.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import 'other_profile_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -167,22 +168,42 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 작성자 정보
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.grey[200], 
-                        child: Text(authorName[0], style: const TextStyle(color: Colors.black54))
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  // ✅ [수정됨] 작성자 정보 (클릭 시 프로필 이동)
+                  GestureDetector(
+                    onTap: () {
+                      // 내 글이 아닐 때만 상대방 프로필로 이동
+                      if (!isMyPost) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OtherProfileScreen(userId: widget.post.userId),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      color: Colors.transparent, // 터치 영역 확보
+                      child: Row(
                         children: [
-                          Text(authorName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text(dateString, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          CircleAvatar(
+                            backgroundColor: Colors.grey[200], 
+                            child: Text(authorName[0], style: const TextStyle(color: Colors.black54))
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(authorName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(dateString, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            ],
+                          ),
+                          if (!isMyPost) ...[
+                            const SizedBox(width: 8),
+                            Icon(Icons.chevron_right, size: 16, color: Colors.grey[400]) // 이동 가능하다는 힌트 아이콘
+                          ]
                         ],
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 20),
 

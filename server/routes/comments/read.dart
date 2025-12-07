@@ -14,20 +14,29 @@ Future<Response> onRequest(RequestContext context) async {
 
     final result = await pool.execute(
       Sql.named('''
-        SELECT c.id, c.content, c.created_at, u.username
+        SELECT 
+          c.id,           -- [0]
+          c.post_id,      -- [1]
+          c.user_id,      -- [2]
+          c.content,      -- [3] (여기가 진짜 내용!)
+          c.created_at,   -- [4]
+          u.username as author_name -- [5]
         FROM comments c
         JOIN users u ON c.user_id = u.id
-        WHERE c.post_id = @pid
+        WHERE c.post_id = @postId
         ORDER BY c.created_at ASC
       '''),
-      parameters: {'pid': postId},
+      parameters: {'postId': postId},
     );
 
+    // ✅ 인덱스 순서 완벽 수정
     final comments = result.map((row) => {
       'id': row[0],
-      'content': row[1],
-      'created_at': row[2].toString(),
-      'username': row[3],
+      'post_id': row[1],     // 1번은 post_id
+      'user_id': row[2],     // 2번은 user_id
+      'content': row[3],     // ✅ 3번이 진짜 내용(content)입니다!
+      'created_at': row[4].toString(), // 4번은 날짜
+      'nickname': row[5],    // 5번은 닉네임 (Flutter 모델에서 'nickname'으로 받으므로 키 이름 변경)
     }).toList();
 
     return Response.json(statusCode: 200, body: {'comments': comments});

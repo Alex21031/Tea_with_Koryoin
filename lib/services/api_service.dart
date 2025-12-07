@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import '../models/post.dart';
+import '../models/chat_model.dart';
 
 class ApiService {
   // 안드로이드 에뮬레이터: 10.0.2.2, iOS: localhost, 실기기: PC IP
@@ -164,7 +165,7 @@ class ApiService {
     };
 
     final response = await http.put(
-      Uri.parse('$baseUrl/users/update'),
+      Uri.parse('$baseUrl/auth/update'),
       headers: _headers(),
       body: jsonEncode(body),
     );
@@ -240,4 +241,93 @@ class ApiService {
       throw Exception('좋아요 상태 확인 실패');
     }
   }
+
+
+// ApiService 클래스 내부에 추가
+
+  // 1. 상대방 프로필 정보 가져오기
+  Future<User> getUserProfile(int userId) async {
+    final response = await http.get(Uri.parse('$baseUrl/users/$userId'));
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body)['user']);
+    } else {
+      throw Exception('사용자 정보를 불러올 수 없습니다.');
+    }
+  }
+
+  // 2. 채팅방 생성 (또는 기존 방 가져오기)
+  Future<int> createChatRoom(int myId, int otherId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/chats/rooms'),
+      headers: _headers(),
+      body: jsonEncode({'my_id': myId, 'other_id': otherId}),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['room_id'];
+    }
+    throw Exception('채팅방 생성 실패');
+  }
+
+  // 3. 내 채팅방 목록 가져오기
+  Future<List<ChatRoom>> getMyChatRooms(int myId) async {
+    final response = await http.get(Uri.parse('$baseUrl/chats/rooms?user_id=$myId'));
+    if (response.statusCode == 200) {
+      final List list = jsonDecode(response.body)['rooms'];
+      return list.map((e) => ChatRoom.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  // 4. 메시지 목록 가져오기
+  Future<List<ChatMessage>> getMessages(int roomId) async {
+    final response = await http.get(Uri.parse('$baseUrl/chats/messages?room_id=$roomId'));
+    if (response.statusCode == 200) {
+      final List list = jsonDecode(response.body)['messages'];
+      return list.map((e) => ChatMessage.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  // 5. 메시지 전송
+  Future<void> sendMessage(int roomId, int senderId, String content) async {
+    await http.post(
+      Uri.parse('$baseUrl/chats/messages'),
+      headers: _headers(),
+      body: jsonEncode({
+        'room_id': roomId,
+        'sender_id': senderId,
+        'content': content,
+      }),
+    );
+  }
+
+ Future<bool> hasUnreadNotifications(int userId) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/notifications/check?user_id=$userId'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['has_unread'] ?? false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+
+    Future<Post> getPostById(int postId) async {
+    final response = await http.get(Uri.parse('$baseUrl/posts/read_one?id=$postId'));
+    if (response.statusCode == 200) {
+      return Post.fromJson(jsonDecode(response.body)['post']);
+    }
+    throw Exception('게시글을 찾을 수 없습니다.');
+  }
+
+  Future<ChatRoom> getChatRoomById(int roomId, int myId) async {
+    final rooms = await getMyChatRooms(myId);
+    return rooms.firstWhere((room) => room.id == roomId, 
+      orElse: () => throw Exception('채팅방을 찾을 수 없습니다.'));
+  }
+
+
 }

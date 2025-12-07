@@ -29,6 +29,7 @@ class User {
       certificatePath: json['certificate_path'],
       role: json['role'] ?? 'user',
       token: token ?? json['token'],
+      
     );
   }
 
@@ -42,6 +43,7 @@ class User {
     String? certificatePath, // 이 필드를 업데이트하기 위함
     String? role,
     String? token,
+    
   }) {
     return User(
       id: id ?? this.id,
@@ -52,6 +54,7 @@ class User {
       certificatePath: certificatePath ?? this.certificatePath, // 로컬 상태 업데이트
       role: role ?? this.role,
       token: token ?? this.token,
+      
     );
   }
 }
