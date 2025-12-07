@@ -2,7 +2,8 @@
 
 간단 소개
 ---------
-tea_with_koryoin은 Dart(주로 Flutter) 기반으로 작성된 프로젝트이며 고려인(Koryoin) 위한 커뮤니티 기능을 제공하는 모바일/웹 앱을 목표로 했습니다.
+tea_with_koryoin은 Dart(주로 Flutter) 기반으로 작성된 프로젝트이며 고려인(Koryoin) 위한 커뮤니티 기능을 제공하는 모바일/웹 앱을 목표로 했습니다. 
+소스코드 중간 중간에 AI로 작성한 코드가 있습니다.
 
 핵심 특징
 ---------
@@ -20,17 +21,13 @@ tea_with_koryoin은 Dart(주로 Flutter) 기반으로 작성된 프로젝트이�
 - 플랫폼별 빌드 도구 (Android SDK, Xcode 등)
 
 
-프로젝트 구조(예시)
+프로젝트 구조
 -------------------
 - lib/              # 앱 소스코드
+- server            # Dart_frog 프레임워크로 만든 서버
 - assets/           # 이미지/폰트 등 정적 자원
-- test/             # 단위/위젯 테스트
 - pubspec.yaml      # 의존성 및 리소스 선언
 
-테스트
------
-단위 및 위젯 테스트 실행:
-flutter test
 
 빌드 및 배포
 ------------
